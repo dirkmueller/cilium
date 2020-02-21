@@ -440,7 +440,7 @@ const (
 
 	// CTMapEntriesGlobalTCP retains the Cilium 1.2 (or earlier) size to
 	// minimize disruption during upgrade.
-	CTMapEntriesGlobalTCPDefault = 1000000
+	CTMapEntriesGlobalTCPDefault = 2 << 18 // 512Ki
 	CTMapEntriesGlobalAnyDefault = 2 << 17 // 256Ki
 	CTMapEntriesGlobalTCPName    = "bpf-ct-global-tcp-max"
 	CTMapEntriesGlobalAnyName    = "bpf-ct-global-any-max"
