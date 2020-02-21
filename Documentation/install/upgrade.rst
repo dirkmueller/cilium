@@ -311,6 +311,321 @@ Annotations:
    upgrade. Connections should successfully re-establish without requiring
    clients to reconnect.
 
+.. _1.8_upgrade_notes:
+
+1.8 Upgrade Notes
+-----------------
+
+.. _current_release_required_changes:
+
+.. _1.8_required_changes:
+
+IMPORTANT: Changes required before upgrading to 1.8.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+   Do not upgrade to 1.8.0 before reading the following section and completing
+   the required steps.
+
+* While operating in direct-routing mode (``--tunnel=disabled``), traffic with
+  a destination address matching a particular CIDR is automatically excluded
+  from being masqueraded. So far, this CIDR consisted of
+  ``<alloc-cidr>/<size>`` where the size could be set with the option
+  ``--ipv4-cluster-cidr-mask-size``. This was not always desirable and
+  limiting, therefore Cilium 1.6 had already introduced the option
+  ``--native-routing-cidr`` allowing to explicitly specify the CIDR for native
+  routing. With Cilium 1.8, the option ``--ipv4-cluster-cidr-mask-size`` is
+  being deprecated and all users must use the option ``--native-routing-cidr``
+  instead.
+
+  .. note:: The ENI IPAM mode automatically derives the native routing CIDR so
+            no action is required.
+
+Deprecated options
+~~~~~~~~~~~~~~~~~~
+
+* ``keep-bpf-templates``: This option no longer has any effect due to the BPF
+  assets not being compiled into the cilium-agent binary anymore. The option is
+  deprecated and will be removed in Cilium 1.9.
+* ``access-log``: L7 access logs have been available via Hubble since Cilium
+  1.6. The ``access-log`` option to log to a file has been removed.
+* ``--disable-k8s-services`` option from cilium-agent has been deprecated
+  and will be removed in Cilium 1.9. 
+
+Renamed Metrics
+~~~~~~~~~~~~~~~
+
+The following metrics have been renamed:
+
+* ``cilium_operator_eni_ips`` to ``cilium_operator_ipam_ips``
+* ``cilium_operator_eni_allocation_ops`` to ``cilium_operator_ipam_allocation_ops``
+* ``cilium_operator_eni_interface_creation_ops`` to ``cilium_operator_ipam_interface_creation_ops``
+* ``cilium_operator_eni_available`` to ``cilium_operator_ipam_available``
+* ``cilium_operator_eni_nodes_at_capacity`` to ``cilium_operator_ipam_nodes_at_capacity``
+* ``cilium_operator_eni_resync_total`` to ``cilium_operator_ipam_resync_total``
+* ``cilium_operator_eni_aws_api_duration_seconds`` to ``cilium_operator_ipam_api_duration_seconds``
+* ``cilium_operator_eni_ec2_rate_limit_duration_seconds`` to ``cilium_operator_ipam_api_rate_limit_duration_seconds``
+
+Deprecated cilium-operator options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``metrics-address``: This option is being deprecated and a new flag is
+  introduced to replace its usage. The new option is ``operator-prometheus-serve-addr``.
+  This old option will be removed in Cilium 1.9
+
+* ``ccnp-node-status-gc``: This option is being deprecated. Disabling CCNP node
+  status GC can be done with ``cnp-node-status-gc-interval=0``. (Note that this
+  is not a typo, it is meant to be ``cnp-node-status-gc-interval``).
+  This old option will be removed in Cilium 1.9
+
+* ``cnp-node-status-gc``: This option is being deprecated. Disabling CNP node
+  status GC can be done with ``cnp-node-status-gc-interval=0``.
+  This old option will be removed in Cilium 1.9
+
+* ``cilium-endpoint-gc``: This option is being deprecated. Disabling cilium
+  endpoint GC can be done with ``cilium-endpoint-gc-interval=0``.
+  This old option will be removed in Cilium 1.9
+
+* ``api-server-port``: This option is being deprecated. The API Server address
+  and port can be enabled with ``operator-api-serve-addr=127.0.0.1:9234``
+  or ``operator-api-serve-addr=[::1]:9234`` for IPv6-only clusters.
+  This old option will be removed in Cilium 1.9
+
+* ``eni-parallel-workers``: This option in the Operator has been renamed to
+  ``parallel-alloc-workers``. The obsolete option name ``eni-parallel-workers``
+  has been deprecated and will be removed in v1.9.
+
+* ``aws-client-burst``: This option in the Operator has been renamed to
+  ``limit-ipam-api-burst``. The obsolete option name ``aws-client-burst`` has been
+  deprecated and will be removed in v1.9.
+
+* ``aws-client-qps``: This option in the Operator has been renamed to
+  ``limit-ipam-api-qps``. The obsolete option name ``aws-client-qps`` has been
+  deprecated and will be removed in v1.9.
+
+Removed options
+~~~~~~~~~~~~~~~
+
+* ``enable-legacy-services``: This option was deprecated in Cilium 1.6 and is
+  now removed.
+
+Removed helm options
+~~~~~~~~~~~~~~~~~~~~
+* ``operator.synchronizeK8sNodes``: was removed and replaced with ``global.synchronizeK8sNodes``
+
+Removed resource fields
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* The fields ``CiliumEndpoint.Status.Status``,
+  ``CiliumEndpoint.Status.Spec``, and ``EndpointIdentity.LabelsSHA256``,
+  deprecated in 1.4, have been removed.
+
+=======
+.. _1.8_upgrade_notes:
+
+1.8 Upgrade Notes
+-----------------
+
+.. _current_release_required_changes:
+
+.. _1.8_required_changes:
+
+IMPORTANT: Changes required before upgrading to 1.8.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+   Do not upgrade to 1.8.0 before reading the following section and completing
+   the required steps.
+
+* While operating in direct-routing mode (``--tunnel=disabled``), traffic with
+  a destination address matching a particular CIDR is automatically excluded
+  from being masqueraded. So far, this CIDR consisted of
+  ``<alloc-cidr>/<size>`` where the size could be set with the option
+  ``--ipv4-cluster-cidr-mask-size``. This was not always desirable and
+  limiting, therefore Cilium 1.6 had already introduced the option
+  ``--native-routing-cidr`` allowing to explicitly specify the CIDR for native
+  routing. With Cilium 1.8, the option ``--ipv4-cluster-cidr-mask-size`` is
+  being deprecated and all users must use the option ``--native-routing-cidr``
+  instead.
+
+  .. note:: The ENI IPAM mode automatically derives the native routing CIDR so
+            no action is required.
+
+Upgrading from >=1.7.0 to 1.8.y
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Since Cilium 1.5, the TCP connection tracking table size parameter
+  ``bpf-ct-global-tcp-max`` in the daemon was set to the default value
+  ``1000000`` to retain backwards compatibility with previous versions. In
+  Cilium 1.8 the default value is set to 512K by default in order to reduce the
+  agent memory consumption.
+
+  If Cilium was deployed using Helm, the new default value of 512K was already
+  effective in Cilium 1.6 or later, unless it was manually configured to a
+  different value.
+
+  If the table size was configured to a value different from 512K in the
+  previous installation, ongoing connections will be disrupted during the
+  upgrade. To avoid connection breakage, ``bpf-ct-global-tcp-max`` needs to be
+  manually adjusted.
+
+  To check whether any action is required the following command can be used to
+  check the currently configured maximum number of TCP conntrack entries:
+
+  .. code:: bash
+
+     sudo grep -R CT_MAP_SIZE_TCP /var/run/cilium/state/templates/
+
+  If the maximum number is 524288, no action is required. If the number is
+  different, ``bpf-ct-global-tcp-max`` needs to be adjusted in the `ConfigMap`
+  to the value shown by the command above (100000 in the example below):
+
+.. tabs::
+  .. group-tab:: kubectl
+
+    .. parsed-literal::
+
+      helm template cilium \\
+      --namespace=kube-system \\
+      ...
+      --set global.bpf.ctTcpMax=100000
+      ...
+      > cilium.yaml
+      kubectl apply -f cilium.yaml
+
+  .. group-tab:: Helm
+
+    .. parsed-literal::
+
+      helm upgrade cilium --namespace=kube-system \\
+      --set global.bpf.ctTcpMax=100000
+
+* The default value for the NAT table size parameter ``bpf-nat-global-max`` in
+  the daemon is derived from the default value of the conntrack table size
+  parameter ``bpf-ct-global-tcp-max``. Since the latter was changed (see
+  above), the default NAT table size decreased from ~820K to 512K.
+
+  The NAT table is only used if either BPF NodePort (``enable-node-port``
+  parameter) or masquerading (``masquerade`` parameter) are enabled. No action
+  is required if neither of the parameters is enabled.
+
+  If either of the parameters is enabled, ongoing connections will be disrupted
+  during the upgrade. In order to avoid connection breakage,
+  ``bpf-nat-global-max`` needs to be manually adjusted.
+
+  To check whether any adjustment is required the following command can be used
+  to check the currently configured maximum number of NAT table entries:
+
+  .. code:: bash
+
+     sudo grep -R SNAT_MAPPING_IPV[46]_SIZE /var/run/cilium/state/globals/
+
+  If the command does not return any value or if the returned maximum number is
+  524288, no action is required. If the number is different,
+  ``bpf-nat-global-max`` needs to be adjusted in the `ConfigMap` to the value
+  shown by the command above (841429 in the example below):
+
+.. tabs::
+  .. group-tab:: kubectl
+
+    .. parsed-literal::
+
+      helm template cilium \\
+      --namespace=kube-system \\
+      ...
+      --set global.bpf.natMax=841429
+      ...
+      > cilium.yaml
+      kubectl apply -f cilium.yaml
+
+  .. group-tab:: Helm
+
+    .. parsed-literal::
+
+      helm upgrade cilium --namespace=kube-system \\
+      --set global.bpf.natMax=841429
+
+Deprecated options
+~~~~~~~~~~~~~~~~~~
+
+* ``keep-bpf-templates``: This option no longer has any effect due to the BPF
+  assets not being compiled into the cilium-agent binary anymore. The option is
+  deprecated and will be removed in Cilium 1.9.
+* ``access-log``: L7 access logs have been available via Hubble since Cilium
+  1.6. The ``access-log`` option to log to a file has been removed.
+* ``--disable-k8s-services`` option from cilium-agent has been deprecated
+  and will be removed in Cilium 1.9.
+
+Renamed Metrics
+~~~~~~~~~~~~~~~
+
+The following metrics have been renamed:
+
+* ``cilium_operator_eni_ips`` to ``cilium_operator_ipam_ips``
+* ``cilium_operator_eni_allocation_ops`` to ``cilium_operator_ipam_allocation_ops``
+* ``cilium_operator_eni_interface_creation_ops`` to ``cilium_operator_ipam_interface_creation_ops``
+* ``cilium_operator_eni_available`` to ``cilium_operator_ipam_available``
+* ``cilium_operator_eni_nodes_at_capacity`` to ``cilium_operator_ipam_nodes_at_capacity``
+* ``cilium_operator_eni_resync_total`` to ``cilium_operator_ipam_resync_total``
+* ``cilium_operator_eni_aws_api_duration_seconds`` to ``cilium_operator_ipam_api_duration_seconds``
+* ``cilium_operator_eni_ec2_rate_limit_duration_seconds`` to ``cilium_operator_ipam_api_rate_limit_duration_seconds``
+
+Deprecated cilium-operator options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``metrics-address``: This option is being deprecated and a new flag is
+  introduced to replace its usage. The new option is ``operator-prometheus-serve-addr``.
+  This old option will be removed in Cilium 1.9
+
+* ``ccnp-node-status-gc``: This option is being deprecated. Disabling CCNP node
+  status GC can be done with ``cnp-node-status-gc-interval=0``. (Note that this
+  is not a typo, it is meant to be ``cnp-node-status-gc-interval``).
+  This old option will be removed in Cilium 1.9
+
+* ``cnp-node-status-gc``: This option is being deprecated. Disabling CNP node
+  status GC can be done with ``cnp-node-status-gc-interval=0``.
+  This old option will be removed in Cilium 1.9
+
+* ``cilium-endpoint-gc``: This option is being deprecated. Disabling cilium
+  endpoint GC can be done with ``cilium-endpoint-gc-interval=0``.
+  This old option will be removed in Cilium 1.9
+
+* ``api-server-port``: This option is being deprecated. The API Server address
+  and port can be enabled with ``operator-api-serve-addr=127.0.0.1:9234``
+  or ``operator-api-serve-addr=[::1]:9234`` for IPv6-only clusters.
+  This old option will be removed in Cilium 1.9
+
+* ``eni-parallel-workers``: This option in the Operator has been renamed to
+  ``parallel-alloc-workers``. The obsolete option name ``eni-parallel-workers``
+  has been deprecated and will be removed in v1.9.
+
+* ``aws-client-burst``: This option in the Operator has been renamed to
+  ``limit-ipam-api-burst``. The obsolete option name ``aws-client-burst`` has been
+  deprecated and will be removed in v1.9.
+
+* ``aws-client-qps``: This option in the Operator has been renamed to
+  ``limit-ipam-api-qps``. The obsolete option name ``aws-client-qps`` has been
+  deprecated and will be removed in v1.9.
+
+Removed options
+~~~~~~~~~~~~~~~
+
+* ``enable-legacy-services``: This option was deprecated in Cilium 1.6 and is
+  now removed.
+
+Removed helm options
+~~~~~~~~~~~~~~~~~~~~
+* ``operator.synchronizeK8sNodes``: was removed and replaced with ``global.synchronizeK8sNodes``
+
+Removed resource fields
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* The fields ``CiliumEndpoint.Status.Status``,
+  ``CiliumEndpoint.Status.Spec``, and ``EndpointIdentity.LabelsSHA256``,
+  deprecated in 1.4, have been removed.
+
 .. _1.7_upgrade_notes:
 
 1.7 Upgrade Notes
