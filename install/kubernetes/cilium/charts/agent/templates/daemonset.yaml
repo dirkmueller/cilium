@@ -136,12 +136,12 @@ spec:
           postStart:
             exec:
               command:
-              - "/cni-install.sh"
+              - {{ .Values.cniInstallScript }}
               -{{- if .Values.global.debug.enabled }} "--enable-debug=true"{{- else }} "--enable-debug=false"{{- end }}
           preStop:
             exec:
               command:
-              - /cni-uninstall.sh
+              - {{ .Values.cniUninstallScript }}
 {{- end }}
         name: cilium-agent
 {{- if .Values.global.prometheus.enabled }}
@@ -233,10 +233,10 @@ spec:
 {{- if and .Values.global.nodeinit.enabled (not (eq .Values.global.nodeinit.bootstrapFile "")) }}
       - name: wait-for-node-init
         command: ['sh', '-c', 'until stat {{ .Values.global.nodeinit.bootstrapFile }} > /dev/null 2>&1; do echo "Waiting on node-init to run..."; sleep 1; done']
-{{- if contains "/" .Values.image }}
-        image: "{{ .Values.image }}"
+{{- if contains "/" .Values.initImage }}
+        image: "{{ .Values.initImage }}"
 {{- else }}
-        image: "{{ .Values.global.registry }}/{{ .Values.image }}:{{ .Values.global.tag }}"
+        image: "{{ .Values.global.registry }}/{{ .Values.initImage }}:{{ .Values.global.tag }}"
 {{- end }}
         imagePullPolicy: {{ .Values.global.pullPolicy }}
         volumeMounts:
@@ -244,7 +244,7 @@ spec:
           name: cilium-bootstrap-file
 {{- end }}
       - command:
-        - /init-container.sh
+        - {{ .Values.initScript }}
         env:
         - name: CILIUM_ALL_STATE
           valueFrom:
@@ -264,10 +264,10 @@ spec:
               key: wait-bpf-mount
               name: cilium-config
               optional: true
-{{- if contains "/" .Values.image }}
-        image: "{{ .Values.image }}"
+{{- if contains "/" .Values.initImage }}
+        image: "{{ .Values.initImage }}"
 {{- else }}
-        image: "{{ .Values.global.registry }}/{{ .Values.image }}:{{ .Values.global.tag }}"
+        image: "{{ .Values.global.registry }}/{{ .Values.initImage }}:{{ .Values.global.tag }}"
 {{- end }}
         imagePullPolicy: {{ .Values.global.pullPolicy }}
         name: clean-cilium-state
