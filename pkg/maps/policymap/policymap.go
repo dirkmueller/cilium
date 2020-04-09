@@ -76,6 +76,9 @@ type PolicyKey struct {
 	TrafficDirection uint8  `align:"egress"`
 }
 
+// SizeofPolicyKey is the size of type PolicyKey.
+const SizeofPolicyKey = int(unsafe.Sizeof(PolicyKey{}))
+
 // PolicyEntry represents an entry in the BPF policy map for an endpoint. It must
 // match the layout of policy_entry in bpf/lib/common.h.
 // +k8s:deepcopy-gen=true
@@ -88,6 +91,9 @@ type PolicyEntry struct {
 	Packets   uint64 `align:"packets"`
 	Bytes     uint64 `align:"bytes"`
 }
+
+// SizeofPolicyEntry is the size of type PolicyEntry.
+const SizeofPolicyEntry = int(unsafe.Sizeof(PolicyEntry{}))
 
 func (pe *PolicyEntry) GetValuePtr() unsafe.Pointer { return unsafe.Pointer(pe) }
 func (pe *PolicyEntry) NewValue() bpf.MapValue      { return &PolicyEntry{} }
@@ -264,9 +270,9 @@ func newMap(path string) *PolicyMap {
 			path,
 			mapType,
 			&PolicyKey{},
-			int(unsafe.Sizeof(PolicyKey{})),
+			SizeofPolicyKey,
 			&PolicyEntry{},
-			int(unsafe.Sizeof(PolicyEntry{})),
+			SizeofPolicyEntry,
 			MaxEntries,
 			flags, 0,
 			bpf.ConvertKeyValue,

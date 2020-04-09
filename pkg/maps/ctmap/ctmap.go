@@ -119,7 +119,7 @@ func setupMapInfo(mapType MapType, define string, mapKey bpf.MapKey, keySize int
 		keySize:   keySize,
 		// the value type is CtEntry for all CT maps
 		mapValue:   &CtEntry{},
-		valueSize:  int(unsafe.Sizeof(CtEntry{})),
+		valueSize:  SizeofCtEntry,
 		maxEntries: maxEntries,
 		parser:     bpf.ConvertKeyValue,
 		natMap:     nat,
