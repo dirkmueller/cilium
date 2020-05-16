@@ -38,7 +38,7 @@ GOLDFLAGS += -X "github.com/cilium/cilium/pkg/envoy.RequiredEnvoyVersionSHA=$(CI
 
 BPF_FILES_EVAL := $(shell git ls-files $(ROOT_DIR)/bpf/ | grep -v .gitignore | tr "\n" ' ')
 BPF_FILES ?= $(BPF_FILES_EVAL)
-BPF_SRCFILES := $(subst ../,,$(BPF_FILES))
+BPF_SRCFILES = $(shell cat $(ROOT_DIR)/BPF_SRCFILES)
 
 CILIUM_DATAPATH_SHA=$(shell cat $(BPF_FILES) | sha1sum | awk '{print $$1}')
 GOLDFLAGS += -X "github.com/cilium/cilium/pkg/datapath/loader.DatapathSHA=$(CILIUM_DATAPATH_SHA)"
