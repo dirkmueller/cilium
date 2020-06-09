@@ -238,8 +238,7 @@ func (l *Loader) Reinitialize(ctx context.Context, o datapath.BaseProgramOwner, 
 		}
 
 		args[initArgMode] = mode
-		if option.Config.EnableNodePort &&
-			strings.ToLower(option.Config.Tunnel) != "disabled" {
+		if strings.ToLower(option.Config.Tunnel) != "disabled" {
 			args[initArgMode] = option.Config.Tunnel
 		}
 		args[initArgDevices] = strings.Join(option.Config.Devices, ";")
