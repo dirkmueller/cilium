@@ -2140,11 +2140,17 @@ func (kub *Kubectl) overwriteHelmOptions(options map[string]string) error {
 		}
 	}
 
+	// Set devices
 	privateIface, err := kub.GetPrivateIface()
 	if err != nil {
 		return err
 	}
-	devices := privateIface
+	defaultIface, err := kub.GetDefaultIface()
+	if err != nil {
+		return err
+	}
+	devices := fmt.Sprintf(`'{%s,%s}'`, privateIface, defaultIface)
+	addIfNotOverwritten(options, "global.nodePort.device", devices)
 
 	if !RunsWithKubeProxy() {
 		nodeIP, err := kub.GetNodeIPByLabel(K8s1, false)
@@ -2160,12 +2166,6 @@ func (kub *Kubectl) overwriteHelmOptions(options map[string]string) error {
 		}
 
 		if RunsOnNetNextOr419Kernel() {
-			// Enable BPF masquerading
-			defaultIface, err := kub.GetDefaultIface()
-			if err != nil {
-				return err
-			}
-			devices = fmt.Sprintf(`'{%s,%s}'`, privateIface, defaultIface)
 			opts["global.bpfMasquerade"] = "true"
 		}
 
@@ -2173,8 +2173,6 @@ func (kub *Kubectl) overwriteHelmOptions(options map[string]string) error {
 			options = addIfNotOverwritten(options, key, value)
 		}
 	}
-
-	addIfNotOverwritten(options, "global.nodePort.device", devices)
 
 	return nil
 }
