@@ -4,19 +4,9 @@
     Please use the official rendered version released here:
     https://docs.cilium.io
 
-.. _arch_guide:
-
 ############
-Architecture
+Introduction
 ############
-
-This document describes the Cilium architecture. It focuses on
-documenting the BPF datapath hooks to implement the Cilium datapath, how
-the Cilium datapath integrates with the container orchestration layer, and the
-objects shared between the layers e.g. the BPF datapath and Cilium agent.
-
-Datapath
-========
 
 The Linux kernel supports a set of BPF hooks in the networking stack
 that can be used to run BPF programs. The Cilium datapath uses these
