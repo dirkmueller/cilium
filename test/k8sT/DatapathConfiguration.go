@@ -213,6 +213,7 @@ var _ = Describe("K8sDatapathConfig", func() {
 
 			deploymentManager.Deploy(helpers.CiliumNamespace, IPSecSecret)
 			deploymentManager.DeployCilium(map[string]string{
+				"global.tunnel":             "vxlan",
 				"global.encryption.enabled": "true",
 			}, DeployCiliumOptionsAndDNS)
 			validateBPFTunnelMap()
@@ -227,6 +228,7 @@ var _ = Describe("K8sDatapathConfig", func() {
 			}
 
 			deploymentManager.DeployCilium(map[string]string{
+				"global.tunnel":          "vxlan",
 				"global.sockops.enabled": "true",
 			}, DeployCiliumOptionsAndDNS)
 			validateBPFTunnelMap()
@@ -537,10 +539,11 @@ var _ = Describe("K8sDatapathConfig", func() {
 
 			deploymentManager.Deploy(helpers.CiliumNamespace, IPSecSecret)
 			deploymentManager.DeployCilium(map[string]string{
-				"global.tunnel":               "disabled",
-				"global.autoDirectNodeRoutes": "true",
-				"global.encryption.enabled":   "true",
-				"global.encryption.interface": privateIface,
+				"global.tunnel":                 "disabled",
+				"global.k8s.requireIPv4PodCIDR": "true",
+				"global.endpointRoutes.enabled": "false",
+				"global.encryption.enabled":     "true",
+				"global.encryption.interface":   privateIface,
 			}, DeployCiliumOptionsAndDNS)
 			Expect(testPodConnectivityAcrossNodes(kubectl)).Should(BeTrue(), "Connectivity test between nodes failed")
 		})
