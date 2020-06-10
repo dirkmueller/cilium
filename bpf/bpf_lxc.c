@@ -305,7 +305,7 @@ ct_recreate6:
 		 */
 		ret = encap_and_redirect_lxc(ctx, tunnel_endpoint, encrypt_key, &key, SECLABEL, monitor);
 		if (ret == IPSEC_ENDPOINT)
-			goto pass_to_stack;
+			return CTX_ACT_OK;
 		else if (ret != DROP_NO_TUNNEL_ENDPOINT)
 			return ret;
 	}
@@ -663,7 +663,7 @@ ct_recreate4:
 		 * for further processing.
 		 */
 		else if (ret == IPSEC_ENDPOINT)
-			goto pass_to_stack;
+			return CTX_ACT_OK;
 		/* This is either redirect by encap code or an error has occured
 		 * either way return and stack will consume ctx.
 		 */
