@@ -461,6 +461,12 @@ const (
 	// LimitTableMax defines the maximum CT or NAT table limit
 	LimitTableMax = 1 << 24 // 16Mi entries (~1GiB of entries per map)
 
+	// PolicyMapMin defines the minimum policy map limit.
+	PolicyMapMin = 1 << 8
+
+	// PolicyMapMax defines the minimum policy map limit.
+	PolicyMapMax = 1 << 16
+
 	// NATMapEntriesGlobalName configures max entries for BPF NAT table
 	NATMapEntriesGlobalName = "bpf-nat-global-max"
 
@@ -1008,9 +1014,9 @@ type DaemonConfig struct {
 	// in the BPF NAT table
 	NATMapEntriesGlobal int
 
-	// PolicyMapMaxEntries is the maximum number of peer identities that an
+	// PolicyMapEntries is the maximum number of peer identities that an
 	// endpoint may allow traffic to exchange traffic with.
-	PolicyMapMaxEntries int
+	PolicyMapEntries int
 
 	// DisableCiliumEndpointCRD disables the use of CiliumEndpoint CRD
 	DisableCiliumEndpointCRD bool
@@ -1627,15 +1633,13 @@ func (c *DaemonConfig) Validate() error {
 		}
 	}
 
-	policyMapMin := (1 << 8)
-	policyMapMax := (1 << 16)
-	if c.PolicyMapMaxEntries < policyMapMin {
+	if c.PolicyMapEntries < PolicyMapMin {
 		return fmt.Errorf("specified PolicyMap max entries %d must exceed minimum %d",
-			c.PolicyMapMaxEntries, policyMapMin)
+			c.PolicyMapEntries, PolicyMapMin)
 	}
-	if c.PolicyMapMaxEntries > policyMapMax {
+	if c.PolicyMapEntries > PolicyMapMax {
 		return fmt.Errorf("specified PolicyMap max entries %d must not exceed maximum %d",
-			c.PolicyMapMaxEntries, policyMapMax)
+			c.PolicyMapEntries, PolicyMapMax)
 	}
 	// Validate that the KVStore Lease TTL value lies between a particular range.
 	if c.KVstoreLeaseTTL > defaults.KVstoreLeaseMaxTTL || c.KVstoreLeaseTTL < defaults.LockLeaseTTL {
@@ -1862,7 +1866,7 @@ func (c *DaemonConfig) Populate() {
 	c.NAT46Range = viper.GetString(NAT46Range)
 	c.FlannelMasterDevice = viper.GetString(FlannelMasterDevice)
 	c.FlannelUninstallOnExit = viper.GetBool(FlannelUninstallOnExit)
-	c.PolicyMapMaxEntries = viper.GetInt(PolicyMapEntriesName)
+	c.PolicyMapEntries = viper.GetInt(PolicyMapEntriesName)
 	c.PProf = viper.GetBool(PProf)
 	c.PreAllocateMaps = viper.GetBool(PreAllocateMapsName)
 	c.PrependIptablesChains = viper.GetBool(PrependIptablesChainsName)
